@@ -16,7 +16,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors({ credentials: true, origin: "https://zapit-client.vercel.app/" })); // allow cookies from frontend
+app.use(cors({ credentials: true, origin: "https://zapit-client.vercel.app" })); // allow cookies from frontend
 app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
