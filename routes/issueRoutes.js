@@ -1,7 +1,7 @@
 // routes/issues.js
 import express from "express";
 import multer from "multer";
-import { createIssue, getIssues } from "../controllers/issueController.js";
+import { createIssue, getIssues, updateIssueById, deleteIssueById } from "../controllers/issueController.js";
 import { upload } from "../middleware/upload.js";
 import { protect } from "../middleware/authMiddleware.js";
 
@@ -16,5 +16,7 @@ const router = express.Router();
 
 // Accept up to e.g. 6 images
 router.post("/", upload.array("images", 6), createIssue);
+router.put("/:id", upload.array("images", 6), updateIssueById);
+router.delete("/:id", deleteIssueById);
 router.get("/", protect, getIssues);
 export default router;

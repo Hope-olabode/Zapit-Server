@@ -15,17 +15,30 @@ export default cloudinary.v2;
 
 /**
  * Upload buffer via upload_stream and return Promise which resolves with result
- * Usage: await uploadBufferToCloudinary(buffer, 'folder/name')
+ * Usage: await uploadBufferToCloudinary(buffer, { folder: 'folder/name' })
  */
 export const uploadBufferToCloudinary = (buffer, options = {}) => {
   return new Promise((resolve, reject) => {
+    // 🔥 Add timeout and resource_type
+    const uploadOptions = {
+      resource_type: "auto",
+      timeout: 120000, // 120 seconds (2 minutes)
+      chunk_size: 6000000, // 6MB chunks for large files
+      ...options,
+    };
+
     const stream = cloudinary.v2.uploader.upload_stream(
-      options,
+      uploadOptions,
       (error, result) => {
-        if (error) return reject(error);
+        if (error) {
+          console.error("❌ Cloudinary upload error:", error);
+          return reject(error);
+        }
+        console.log("✅ Cloudinary upload success:", result.public_id);
         resolve(result);
       }
     );
+    
     stream.end(buffer);
   });
 };

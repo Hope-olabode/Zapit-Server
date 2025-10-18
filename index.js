@@ -1,6 +1,7 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
@@ -9,14 +10,14 @@ import locationRoutes from "./routes/locationRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js"
 import issuesRouter from "./routes/issueRoutes.js";
 
-dotenv.config();
+
 connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors({ credentials: true, origin: "https://zapit-client.vercel.app" })); // allow cookies from frontend
+app.use(cors({ credentials: true, origin: "https://zapit-client.vercel.app" /* "http://localhost:5173" */ })); // allow cookies from frontend
 app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
