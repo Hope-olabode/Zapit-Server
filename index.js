@@ -9,6 +9,7 @@ import authRoutes from "./routes/authRoutes.js";
 import locationRoutes from "./routes/locationRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js"
 import issuesRouter from "./routes/issueRoutes.js";
+import surveyRoutes from "./routes/surveyRoutes.js";
 
 
 connectDB();
@@ -27,6 +28,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/locations", locationRoutes);
 app.use("/api/categories", categoryRoutes)
 app.use("/api/issues", issuesRouter);
+app.use("/api/surveys", surveyRoutes);
 
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
