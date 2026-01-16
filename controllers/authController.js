@@ -84,3 +84,15 @@ export const getProfile = async (req, res) => {
     res.status(404).json({ message: "User not found" });
   }
 };
+
+// controllers/userController.js
+export const isLoggedIn = (req, res) => {
+  res.json({
+    loggedIn: true,
+    user: {
+      _id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+    },
+  });
+};

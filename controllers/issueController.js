@@ -3,6 +3,7 @@ import Issue from "../models/issue.js";
 import { v2 as cloudinary } from "cloudinary";
 import { uploadBufferToCloudinary } from "../config/cloudinary.js";
 import issue from "../models/issue.js";
+import { getFormattedDateTime } from "../utils/date.js";
 
 export const createIssue = async (req, res) => {
   try {
@@ -73,6 +74,13 @@ export const createIssue = async (req, res) => {
       }
     }
 
+    // 🟢 Determine completedAt on creation
+    let completedAt = null;
+
+    if (status === "Resolved") {
+      completedAt = dateTime || null; // use the exact dateTime sent from client
+    }
+
     // ✅ Create and save issue
     const issue = new Issue({
       description: description.trim(),
@@ -84,6 +92,7 @@ export const createIssue = async (req, res) => {
       dateTime: dateTime || "",
       categories,
       images: uploadedImages,
+      completedAt,
     });
 
     await issue.save();
@@ -143,10 +152,13 @@ export const getIssues = async (req, res) => {
 export const updateIssueById = async (req, res) => {
   console.log("=== 🔍 DEBUG START ===");
   console.log("📥 req.files:", req.files);
-  console.log("🔑 req.files keys:", req.files ? Object.keys(req.files) : 'NO FILES OBJECT');
+  console.log(
+    "🔑 req.files keys:",
+    req.files ? Object.keys(req.files) : "NO FILES OBJECT"
+  );
   console.log("📦 req.body:", req.body);
   console.log("=== 🔍 DEBUG END ===");
-  
+
   try {
     const { id } = req.params;
 
@@ -164,6 +176,8 @@ export const updateIssueById = async (req, res) => {
       status,
       priority,
       dateTime,
+
+      completedAt,
     } = req.body;
 
     // 2️⃣ Parse categories safely
@@ -182,7 +196,7 @@ export const updateIssueById = async (req, res) => {
 
     // 3️⃣ Handle existing + new images
     const imageLimit = 3;
-    
+
     // 🔥 Handle both multer formats
     let files = [];
     if (req.files) {
@@ -194,7 +208,7 @@ export const updateIssueById = async (req, res) => {
         files = req.files.images;
       }
     }
-    
+
     console.log("🖼️ Files array:", files);
     console.log("🖼️ Files count:", files.length);
     console.log("🖼️ First file (if exists):", files[0]);
@@ -250,13 +264,26 @@ export const updateIssueById = async (req, res) => {
     }
 
     // --- Merge kept + new (max 3) ---
-    const finalImages = [...existingImages, ...uploadedImages].slice(0, imageLimit);
+    const finalImages = [...existingImages, ...uploadedImages].slice(
+      0,
+      imageLimit
+    );
     console.log("🎯 Final images count:", finalImages.length);
 
+    if (
+      status === "Resolved" &&
+      existingIssue.status !== "Resolved" &&
+      !existingIssue.completedAt
+    ) {
+      existingIssue.completedAt = completedAt || null; // use client-provided datetime
+    }
+
     // 4️⃣ Update issue fields
-    existingIssue.description = description?.trim() || existingIssue.description;
+    existingIssue.description =
+      description?.trim() || existingIssue.description;
     existingIssue.Caused_by = Caused_by?.trim() || existingIssue.Caused_by;
-    existingIssue.Responsibility = Responsibility?.trim() || existingIssue.Responsibility;
+    existingIssue.Responsibility =
+      Responsibility?.trim() || existingIssue.Responsibility;
     existingIssue.location = location?.trim() || existingIssue.location;
     existingIssue.status = status || existingIssue.status;
     existingIssue.priority = priority || existingIssue.priority;
@@ -280,7 +307,6 @@ export const updateIssueById = async (req, res) => {
   }
 };
 
-
 export const deleteIssueById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -299,7 +325,10 @@ export const deleteIssueById = async (req, res) => {
             await cloudinary.uploader.destroy(img.public_id);
             console.log(`🗑️ Deleted Cloudinary image: ${img.public_id}`);
           } catch (err) {
-            console.warn(`⚠️ Failed to delete image ${img.public_id}:`, err.message);
+            console.warn(
+              `⚠️ Failed to delete image ${img.public_id}:`,
+              err.message
+            );
           }
         }
       }

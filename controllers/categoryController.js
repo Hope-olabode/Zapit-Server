@@ -3,22 +3,31 @@ import Category from "../models/categoryModel.js";
 // Create a new category
 export const createCategory = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, colour } = req.body; // ✅ include colour
+    console.log("Creating category with name:", name, "and colour:", colour);
 
     if (!name || !name.trim()) {
-      return res.status(400).json({ message: "category name is required" });
+      return res.status(400).json({ message: "Category name is required" });
+    }
+
+    if (!colour || !colour.trim()) {
+      return res.status(400).json({ message: "Category colour is required" });
     }
 
     // Check if category already exists
     const existing = await Category.findOne({ name: name.trim() });
     if (existing) {
-      return res.status(400).json({ message: "category already exists" });
+      return res.status(400).json({ message: "Category already exists" });
     }
 
-    const category = await Category.create({ name: name.trim() });
+    // ✅ Now include colour when creating
+    const category = await Category.create({
+      name: name.trim(),
+      colour: colour.trim(),
+    });
 
     res.status(201).json({
-      message: "category created successfully",
+      message: "Category created successfully",
       category,
     });
   } catch (error) {
@@ -26,6 +35,7 @@ export const createCategory = async (req, res) => {
     res.status(500).json({ message: "Server error while creating category" });
   }
 };
+
 
 
 // Fetch all categories

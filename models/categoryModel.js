@@ -8,6 +8,12 @@ const categorySchema = new mongoose.Schema(
       trim: true,
       unique: true,
     },
+    colour: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+    },
   },
   { timestamps: true }
 );
